@@ -1,0 +1,14 @@
+name: AI Code Quality Review
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  ai-code-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: AI Code Review
+        # Replace with a real AI code review action from the Marketplace if available.
+        uses: github/copilot-actions/review@latest
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
