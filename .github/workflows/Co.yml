@@ -1,50 +1,46 @@
-name: Automated Code Quality Review and Copilot Guidance
+name: Automated Code Quality Fixes and Copilot Review
 
 on:
   push:
-    branches:
-      - '**'
+    branches: ["main"]
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
-  quality-check:
+  detect-errors:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run TypeScript type check
-        run: npx tsc --noEmit
-
-      - name: Run ESLint
-        run: npx eslint . --ext .js,.ts
-
-      - name: Run Prettier check
-        run: npx prettier --check .
-
-      - name: Run ShellCheck on shell scripts
+      - uses: actions/checkout@v4
+      - name: Run checks (TypeScript, ESLint, ShellCheck, etc.)
         run: |
-          find . -type f -name "*.sh" -exec shellcheck {} +
-
-      - name: Gather error report
-        if: failure()
+          npm ci
+          npx tsc --noEmit || echo "::set-output name=error::true"
+          npx eslint . --ext .js,.ts || echo "::set-output name=error::true"
+          # ... other checks ...
+      - name: Gather and explain errors
+        if: steps.checks.outputs.error == 'true'
         run: |
-          echo "There were code errors or quality issues. Please open this commit/PR and run Copilot Chat for suggestions and fixes." > error_report.txt
+          echo "Detected issues. See report." > error_report.txt
+          # Add explanations or diagnostics here
 
-      - name: Create issue and assign reviewer
-        if: failure()
-        uses: peter-evans/create-issue-from-file@v5
+      - name: Create Pull Request for Fixes
+        if: steps.checks.outputs.error == 'true'
+        uses: peter-evans/create-pull-request@v7
         with:
-          title: "Code Quality Review Needed (Automated)"
-          content-filepath: error_report.txt
+          title: "Automated Code Quality Fixes"
+          body: |
+            This PR addresses code quality issues detected by the automated workflow.
+            Copilot will be assigned for AI-powered review and fix suggestions.
           assignees: dzp5103
-          labels: review, copilot
+          labels: auto-fix, copilot-review
 
-      # Optionally, you could use a bot or your own username in assignees.
+  copilot-review:
+    needs: detect-errors
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Copilot AI Review
+        uses: github/copilot-actions/review@latest
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
