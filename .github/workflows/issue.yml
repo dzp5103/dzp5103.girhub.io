@@ -1,0 +1,37 @@
+name: Issue to PR Automation
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  convert-issue-to-pr:
+    if: github.event.label.name == 'needs-fix'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create branch for issue
+        run: |
+          ISSUE_NUMBER=${{ github.event.issue.number }}
+          BRANCH="issue-${ISSUE_NUMBER}"
+          git checkout -b $BRANCH
+          git push origin $BRANCH
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: "Fix issue #${{ github.event.issue.number }} - ${{ github.event.issue.title }}"
+          body: |
+            Automatically created PR for [issue #${{ github.event.issue.number }}](${{ github.event.issue.html_url }}).
+            @github-copilot: Please review and suggest a fix.
+          head: "issue-${{ github.event.issue.number }}"
+          base: main
+          assignees: github-copilot # Replace with actual user/team if desired
+          reviewers: github-copilot # Replace with actual user/team if desired
