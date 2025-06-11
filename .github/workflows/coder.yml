@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: AI Code Review
+      - name: Copilot AI Review
         uses: github/copilot-actions/review@latest
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
