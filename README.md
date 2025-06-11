@@ -81,12 +81,17 @@ const developer = {
 ## 📊 GitHub Analytics
 
 <div align="center">
-  <img height="180em" src="https://github-readme-stats.vercel.app/api?username=dzp5103&show_icons=true&theme=tokyonight&include_all_commits=true&count_private=true"/>
-  <img height="180em" src="https://github-readme-stats.vercel.app/api/top-langs/?username=dzp5103&layout=compact&langs_count=8&theme=tokyonight"/>
+  <img height="180em" src="https://github-readme-stats.vercel.app/api?username=dzp5103&show_icons=true&theme=tokyonight&include_all_commits=true&count_private=true" alt="GitHub Stats" onerror="this.style.display='none'" />
+  <img height="180em" src="https://github-readme-stats.vercel.app/api/top-langs/?username=dzp5103&layout=compact&langs_count=8&theme=tokyonight" alt="Top Languages" onerror="this.style.display='none'" />
 </div>
 
 <div align="center">
-  <img src="https://github-readme-streak-stats.herokuapp.com/?user=dzp5103&theme=tokyonight" alt="GitHub Streak Stats"/>
+  <p><small>📊 <em>Stats widgets may take a moment to load or may be temporarily unavailable due to API rate limits</em></small></p>
+</div>
+
+<div align="center">
+  <img src="https://github-readme-streak-stats.herokuapp.com/?user=dzp5103&theme=tokyonight" alt="GitHub Streak Stats" onerror="this.style.display='none'" />
+  <p><small>🔥 <em>Streak stats may be temporarily unavailable</em></small></p>
 </div>
 
 <div align="center">
@@ -206,6 +211,15 @@ graph TD
 
 <!--START_SECTION:waka-->
 ```text
+⚙️ Setting up WakaTime integration...
+
+To see your real coding time stats here:
+1. Sign up at https://wakatime.com/
+2. Install WakaTime plugin in your IDE
+3. Add WAKATIME_API_KEY to repository secrets
+4. Stats will automatically update daily!
+
+Meanwhile, here's a sample of what you'll see:
 JavaScript   12 hrs 30 mins  ████████████░░░░░░░░░░░░░   48.2%
 TypeScript   6 hrs 45 mins   ██████░░░░░░░░░░░░░░░░░░░   26.1%
 Python       3 hrs 20 mins   ███░░░░░░░░░░░░░░░░░░░░░░   12.9%
@@ -343,7 +357,12 @@ HTML         1 hr 5 mins     █░░░░░░░░░░░░░░░░
 
 <div align="center">
 
-[![Spotify](https://novatorem.vercel.app/api/spotify)](https://open.spotify.com/user/yourusername)
+<!-- Replace 'yourusername' with your actual Spotify username -->
+<!-- To set up: Visit https://github.com/novatorem/novatorem for setup instructions -->
+[![Spotify](https://novatorem.vercel.app/api/spotify?background_color=0d1117&border_color=ffffff)](https://open.spotify.com/user/dzp5103)
+
+<p><em>🎵 Currently listening to music or recently played tracks will appear here</em></p>
+<p><small>⚙️ <a href="https://github.com/novatorem/novatorem">Set up Spotify integration</a> to show your real-time music activity</small></p>
 
 </div>
 

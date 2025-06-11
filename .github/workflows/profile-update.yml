@@ -40,5 +40,16 @@ jobs:
         if [ -n "$(git status --porcelain)" ]; then
           git add README.md
           git commit -m "🤖 Auto-update profile timestamp"
-          git push
+          # Handle potential merge conflicts by pulling and retrying
+          if ! git push; then
+            echo "Push failed, attempting to pull and retry..."
+            git pull --rebase origin $(git branch --show-current) || {
+              echo "Rebase failed, attempting merge strategy..."
+              git pull --no-rebase origin $(git branch --show-current)
+            }
+            git push || {
+              echo "Final push attempt failed. Manual intervention may be required."
+              exit 1
+            }
+          fi
         fi
