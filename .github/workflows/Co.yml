@@ -1,0 +1,50 @@
+name: Automated Code Quality Review and Copilot Guidance
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  quality-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run TypeScript type check
+        run: npx tsc --noEmit
+
+      - name: Run ESLint
+        run: npx eslint . --ext .js,.ts
+
+      - name: Run Prettier check
+        run: npx prettier --check .
+
+      - name: Run ShellCheck on shell scripts
+        run: |
+          find . -type f -name "*.sh" -exec shellcheck {} +
+
+      - name: Gather error report
+        if: failure()
+        run: |
+          echo "There were code errors or quality issues. Please open this commit/PR and run Copilot Chat for suggestions and fixes." > error_report.txt
+
+      - name: Create issue and assign reviewer
+        if: failure()
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: "Code Quality Review Needed (Automated)"
+          content-filepath: error_report.txt
+          assignees: dzp5103
+          labels: review, copilot
+
+      # Optionally, you could use a bot or your own username in assignees.
