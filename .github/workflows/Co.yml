@@ -8,8 +8,6 @@ on:
 jobs:
   quality-check:
     runs-on: ubuntu-latest
-    outputs:
-      error_found: ${{ steps.detect-error.outputs.error }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -23,19 +21,39 @@ jobs:
         run: npm ci
 
       - name: Run TypeScript type check
-        id: detect-error
-        run: |
-          npx tsc --noEmit || echo "::set-output name=error::true"
-          npx eslint . --ext .js,.ts || echo "::set-output name=error::true"
-          npx prettier --check . || echo "::set-output name=error::true"
+        id: tsc
+        run: npx tsc --noEmit
 
-      - name: Gather error report
-        if: steps.detect-error.outputs.error == 'true'
-        run: |
-          echo "There were code errors or quality issues. Please open this commit/PR and run Copilot Chat for suggestions and fixes." > error_report.txt
+      - name: Run ESLint
+        id: eslint
+        run: npx eslint . --ext .js,.ts
 
-      - name: Create issue and assign reviewer
-        if: steps.detect-error.outputs.error == 'true'
+      - name: Run Prettier check
+        id: prettier
+        run: npx prettier --check .
+
+      - name: Run ShellCheck on shell scripts
+        id: shellcheck
+        run: |
+          find . -type f -name "*.sh" -exec shellcheck {} +
+
+      - name: Detect errors and prepare report
+        id: detect_error
+        run: |
+          ERR=0
+          if [ "${{ steps.tsc.outcome }}" = "failure" ]; then ERR=1; fi
+          if [ "${{ steps.eslint.outcome }}" = "failure" ]; then ERR=1; fi
+          if [ "${{ steps.prettier.outcome }}" = "failure" ]; then ERR=1; fi
+          if [ "${{ steps.shellcheck.outcome }}" = "failure" ]; then ERR=1; fi
+          if [ "$ERR" -eq 1 ]; then
+            echo "There were code errors or quality issues. This will auto-create an issue and a PR for Copilot to review." > error_report.txt
+            echo "::set-output name=error::true"
+          else
+            echo "::set-output name=error::false"
+          fi
+
+      - name: Create issue for code quality errors
+        if: steps.detect_error.outputs.error == 'true'
         uses: peter-evans/create-issue-from-file@v5
         with:
           title: "Code Quality Review Needed (Automated)"
@@ -43,11 +61,11 @@ jobs:
           assignees: dzp5103
           labels: review, copilot
 
-      - name: Create Pull Request for Fixes
-        if: steps.detect-error.outputs.error == 'true'
+      - name: Create Pull Request for automated fixes
+        if: steps.detect_error.outputs.error == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
-          title: "Automated Code Quality Fixes"
+          title: "Automated Code Quality Fixes (Copilot Review)"
           body: |
             This PR addresses code quality issues detected by the automated workflow.
             Copilot will be assigned for AI-powered review and fix suggestions.
