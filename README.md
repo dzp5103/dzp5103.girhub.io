@@ -14,7 +14,6 @@
 </div>
 
 ---
-
 ## 🚀 About Me
 
 ```typescript
