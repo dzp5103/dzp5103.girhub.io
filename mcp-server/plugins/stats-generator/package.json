@@ -1,0 +1,19 @@
+{
+  "name": "stats-generator-plugin",
+  "version": "1.0.0",
+  "description": "Example plugin for generating GitHub statistics",
+  "main": "index.js",
+  "type": "module",
+  "keywords": [
+    "github",
+    "stats",
+    "plugin",
+    "mcp"
+  ],
+  "author": "GitHub README Transformer",
+  "license": "MIT",
+  "dependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

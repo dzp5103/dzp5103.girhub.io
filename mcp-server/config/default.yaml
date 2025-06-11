@@ -1,0 +1,87 @@
+# Default configuration for GitHub README Transformer MCP Server
+server:
+  name: "github-readme-transformer"
+  version: "1.0.0"
+  port: 3001
+  host: "localhost"
+  environment: "development"
+
+# GitHub API Configuration
+github:
+  api:
+    baseUrl: "https://api.github.com"
+    version: "2022-11-28"
+    timeout: 30000
+    retries: 3
+    retryDelay: 1000
+  rateLimit:
+    requestsPerHour: 5000
+    burstLimit: 100
+    windowMs: 3600000 # 1 hour
+  cache:
+    ttl: 300 # 5 minutes for basic data
+    maxSize: 1000
+
+# Database Configuration
+database:
+  postgres:
+    host: "localhost"
+    port: 5432
+    database: "github_readme_transformer"
+    maxConnections: 20
+    connectionTimeout: 30000
+  redis:
+    host: "localhost"
+    port: 6379
+    database: 0
+    keyPrefix: "grt:"
+    defaultTTL: 3600 # 1 hour
+
+# Logging Configuration
+logging:
+  level: "info"
+  format: "json"
+  maxFiles: 10
+  maxSize: "10MB"
+  datePattern: "YYYY-MM-DD"
+
+# Plugin System Configuration
+plugins:
+  enabled: true
+  directory: "./plugins"
+  autoLoad: true
+  timeout: 30000
+  maxConcurrent: 5
+
+# Processing Configuration
+processing:
+  mode: "hybrid" # hybrid, realtime, scheduled
+  batchSize: 10
+  maxRetries: 3
+  retryDelay: 5000
+  scheduledProcessing:
+    enabled: true
+    cron: "0 */6 * * *" # Every 6 hours
+    timezone: "UTC"
+
+# Security Configuration
+security:
+  enableCors: true
+  corsOrigins: 
+    - "http://localhost:3000"
+    - "https://github.com"
+  helmet:
+    enabled: true
+  rateLimit:
+    windowMs: 900000 # 15 minutes
+    max: 1000 # requests per window
+    message: "Too many requests from this IP"
+
+# Feature Flags
+features:
+  analytics: true
+  caching: true
+  realTimeProcessing: true
+  scheduledProcessing: true
+  pluginSystem: true
+  webhooks: false # Will be enabled in future phases

@@ -1,0 +1,44 @@
+name: Profile Auto-Update
+
+on:
+  schedule:
+    # Run every 6 hours to keep profile fresh
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  update-profile:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Update README timestamps
+      run: |
+        # Update last updated timestamp in README
+        current_date=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+        if grep -q "Last updated:" README.md; then
+          sed -i "s/Last updated:.*/Last updated: $current_date/" README.md
+        else
+          echo -e "\n---\n\n*Last updated: $current_date*" >> README.md
+        fi
+        
+    - name: Commit changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        if [ -n "$(git status --porcelain)" ]; then
+          git add README.md
+          git commit -m "🤖 Auto-update profile timestamp"
+          git push
+        fi
