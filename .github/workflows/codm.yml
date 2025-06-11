@@ -1,0 +1,36 @@
+name: AI Code Quality Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  ai-code-review:
+    name: Run AI-Powered Code Quality Review
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the PR's code
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Ensures full history is available for review
+
+      # Step 2: Run GitHub Copilot AI code review
+      - name: Run GitHub Copilot AI Code Review
+        uses: github/copilot-actions/review@latest
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+        # env:
+        #   ADDITIONAL_ENV_VAR: value # Uncomment/add if your action requires environment variables
+
+      # Step 3: (Optional) Upload review artifacts or summary
+      # - name: Upload Review Summary
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: ai-code-review-summary
+      #     path: path/to/summary/report
+
+# Notes:
+# - Make sure your repository is enrolled for GitHub Copilot Actions beta or replace with another AI code review action.
+# - You can customize the workflow further based on your requirements.
