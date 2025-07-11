@@ -14,7 +14,7 @@ A Model Context Protocol (MCP) server for transforming GitHub profile READMEs wi
 - **Comprehensive Logging**: Structured logging with multiple output formats
 - **Health Monitoring**: Built-in health checks and monitoring
 
-## Architecture
+## Architecturrd
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
