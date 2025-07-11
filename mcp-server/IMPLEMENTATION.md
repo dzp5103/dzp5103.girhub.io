@@ -6,7 +6,7 @@ This document provides a comprehensive overview of the GitHub README Transformer
 
 The MCP server is built using a modular architecture with the following key components:
 
-### Core Components
+### Core Componentss
 
 1. **Configuration Management** (`src/config/`)
    - YAML-based configuration with environment overrides
