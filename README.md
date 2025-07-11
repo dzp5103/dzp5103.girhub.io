@@ -10,7 +10,6 @@
 </div>
 
 ---
-
 ## 🚀 About Me
 
 ```typescript
