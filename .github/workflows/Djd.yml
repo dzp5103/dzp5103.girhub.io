@@ -1,4 +1,4 @@
-            - name: Codeball AI Code Review
+            name: Codeball AI Code Review
   # You may pin to the exact commit or the version.
   # uses: sturdy-dev/codeball-action@102067b9f537482cee112577655c85fda56d8926
   uses: sturdy-dev/codeball-action@v2.6.0
