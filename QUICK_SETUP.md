@@ -1,7 +1,6 @@
 # 🚀 Quick GitHub Profile Setup Guide
  
 ## ✅ Your GitHub Profile is Ready!
-
 > **Note**: This guide helps you set up a GitHub profile README repository (`dzp5103/dzp5103`) which displays on your GitHub profile page. This is different from a GitHub Pages repository (`dzp5103/dzp5103.github.io`) used for hosting websites.
 
 Your comprehensive GitHub profile has been created with all the following features:
