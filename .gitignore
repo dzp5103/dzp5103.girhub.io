@@ -1,0 +1,28 @@
+# Temporary files and artifacts
+*.tmp
+*.temp
+*~
+.DS_Store
+Thumbs.db
+
+# IDE and editor files
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store?
+ehthumbs.db
+Icon?
+
+# Logs and debugging files
+*.log
+npm-debug.log*
+
+# Accidentally created command output files
+-la
+-ll
+-l
+help
+help.txt
