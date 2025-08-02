@@ -2,6 +2,8 @@
  
 ## ✅ Your GitHub Profile is Ready!
 
+> **Note**: This guide helps you set up a GitHub profile README repository (`dzp5103/dzp5103`) which displays on your GitHub profile page. This is different from a GitHub Pages repository (`dzp5103/dzp5103.github.io`) used for hosting websites.
+
 Your comprehensive GitHub profile has been created with all the following features:
 
 ### 🌟 Profile Features Included:
@@ -32,15 +34,16 @@ Your comprehensive GitHub profile has been created with all the following featur
 ```
 
 ### Option 2: Manual Steps
-1. **Create Repository**: Create a repository named `dzp5103` (your username)
-2. **Copy Files**: Copy all files to your repository
-3. **Enable Actions**: Go to Settings → Actions → General → Enable workflows
-4. **Push Changes**: Commit and push to trigger workflows
+1. **Create Profile Repository**: Create a repository named `dzp5103` (same as your username) for your GitHub profile README
+2. **Copy README**: Copy the README.md file to your profile repository
+3. **Create Pages Repository**: Create a repository named `dzp5103.github.io` for GitHub Pages (optional)
+4. **Enable Actions**: Go to Settings → Actions → General → Enable workflows
+5. **Push Changes**: Commit and push to trigger workflows
 
 ## 🎯 Next Steps
 
 ### 1. Enable GitHub Actions
-- Go to your repository: `https://github.com/dzp5103/dzp5103`
+- Go to your profile repository: `https://github.com/dzp5103/dzp5103`
 - Navigate to **Settings** → **Actions** → **General**
 - Select **"Allow all actions and reusable workflows"**
 - Save changes
@@ -78,9 +81,9 @@ Your comprehensive GitHub profile has been created with all the following featur
 
 ## 🔍 Verification Checklist
 
-- [ ] Repository named correctly (`dzp5103`)
-- [ ] README.md displays properly on GitHub
-- [ ] GitHub Actions are enabled
+- [ ] Profile repository named correctly (`dzp5103`)
+- [ ] README.md displays properly on your GitHub profile
+- [ ] GitHub Actions are enabled in the profile repository
 - [ ] Snake workflow runs successfully
 - [ ] All badges and widgets load correctly
 - [ ] Social links work properly
@@ -105,6 +108,7 @@ Your comprehensive GitHub profile has been created with all the following featur
 
 Your GitHub profile is now a professional showcase that will impress visitors and potential collaborators. The automated workflows will keep your stats fresh, and the comprehensive design highlights your skills and projects effectively.
 
-**Profile URL**: `https://github.com/dzp5103`
+**GitHub Profile**: `https://github.com/dzp5103`  
+**GitHub Pages** (if enabled): `https://dzp5103.github.io`
 
 *Happy coding! 🚀*
