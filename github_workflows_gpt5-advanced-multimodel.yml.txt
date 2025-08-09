@@ -1,0 +1,206 @@
+name: Advanced Multi-Model GPT-5 Workflow
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, labeled]
+    branches: [main, develop]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      gpt_model:
+        description: "GPT model to use"
+        required: true
+        default: "gpt-5"
+        type: choice
+        options:
+          - gpt-5
+          - gpt-5-chat
+          - gpt-5-turbo
+          - gpt-4-turbo
+      tasks:
+        description: "Tasks to run (comma-separated: review,doc,roadmap,optimize,all)"
+        required: true
+        default: "all"
+        type: string
+      target:
+        description: "Target file(s) or directory"
+        required: false
+        type: string
+
+env:
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY || secrets.COPILOT_API_KEY }}
+  GITHUB_TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
+
+jobs:
+  parse-trigger:
+    runs-on: ubuntu-latest
+    outputs:
+      gpt_model: ${{ steps.parse.outputs.gpt_model }}
+      tasks: ${{ steps.parse.outputs.tasks }}
+      target: ${{ steps.parse.outputs.target }}
+      trigger_type: ${{ steps.parse.outputs.trigger_type }}
+      context_number: ${{ steps.parse.outputs.context_number }}
+    steps:
+      - name: Parse Workflow Trigger
+        id: parse
+        run: |
+          # Default values
+          MODEL="gpt-5"
+          TASKS="all"
+          TARGET=""
+          TRIGGER="auto"
+          CONTEXT_NUMBER=""
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            MODEL="${{ github.event.inputs.gpt_model }}"
+            TASKS="${{ github.event.inputs.tasks }}"
+            TARGET="${{ github.event.inputs.target }}"
+            TRIGGER="manual"
+          elif [ "${{ github.event_name }}" = "issue_comment" ]; then
+            COMMENT="${{ github.event.comment.body }}"
+            if echo "$COMMENT" | grep -qi "/gpt5 "; then
+              TRIGGER="slash"
+              # Example: /gpt5 review,doc src/
+              ARGS=$(echo "$COMMENT" | sed 's/^\/gpt5 //i')
+              TASKS=$(echo "$ARGS" | awk '{print $1}')
+              TARGET=$(echo "$ARGS" | awk '{print $2}')
+            fi
+            CONTEXT_NUMBER="${{ github.event.issue.number || github.event.pull_request.number }}"
+          elif [ "${{ github.event.label.name }}" = "gpt5-analysis" ]; then
+            TRIGGER="label"
+            TASKS="all"
+          fi
+
+          echo "gpt_model=$MODEL" >> $GITHUB_OUTPUT
+          echo "tasks=$TASKS" >> $GITHUB_OUTPUT
+          echo "target=$TARGET" >> $GITHUB_OUTPUT
+          echo "trigger_type=$TRIGGER" >> $GITHUB_OUTPUT
+          echo "context_number=$CONTEXT_NUMBER" >> $GITHUB_OUTPUT
+
+  analyze-code:
+    name: "GPT-5 Code Review"
+    needs: parse-trigger
+    if: contains(needs.parse-trigger.outputs.tasks, 'review') || needs.parse-trigger.outputs.tasks == 'all'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run GPT-5 Code Review
+        run: |
+          npx gpt-model-call \
+            --model "${{ needs.parse-trigger.outputs.gpt_model }}" \
+            --task "review" \
+            --target "${{ needs.parse-trigger.outputs.target || '.' }}" \
+            --output "gpt5-review.md"
+
+      - name: Upload Review Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gpt5-review
+          path: gpt5-review.md
+
+  generate-docs:
+    name: "GPT-5 Documentation"
+    needs: parse-trigger
+    if: contains(needs.parse-trigger.outputs.tasks, 'doc') || needs.parse-trigger.outputs.tasks == 'all'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run GPT-5 Documentation Generation
+        run: |
+          npx gpt-model-call \
+            --model "${{ needs.parse-trigger.outputs.gpt_model }}" \
+            --task "document" \
+            --target "${{ needs.parse-trigger.outputs.target || '.' }}" \
+            --output "gpt5-docs.md"
+
+      - name: Upload Docs Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gpt5-docs
+          path: gpt5-docs.md
+
+  optimize-performance:
+    name: "GPT-5 Optimization"
+    needs: parse-trigger
+    if: contains(needs.parse-trigger.outputs.tasks, 'optimize') || needs.parse-trigger.outputs.tasks == 'all'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run GPT-5 Performance Optimization
+        run: |
+          npx gpt-model-call \
+            --model "${{ needs.parse-trigger.outputs.gpt_model }}" \
+            --task "optimize" \
+            --target "${{ needs.parse-trigger.outputs.target || '.' }}" \
+            --output "gpt5-optimize.md"
+
+      - name: Upload Optimize Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gpt5-optimize
+          path: gpt5-optimize.md
+
+  roadmap-planner:
+    name: "GPT-5 Roadmap"
+    needs: parse-trigger
+    if: contains(needs.parse-trigger.outputs.tasks, 'roadmap') || needs.parse-trigger.outputs.tasks == 'all'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run GPT-5 Roadmap Task
+        run: |
+          npx gpt-model-call \
+            --model "${{ needs.parse-trigger.outputs.gpt_model }}" \
+            --task "roadmap" \
+            --target "${{ needs.parse-trigger.outputs.target || '.' }}" \
+            --output "gpt5-roadmap.md"
+
+      - name: Upload Roadmap Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gpt5-roadmap
+          path: gpt5-roadmap.md
+
+  summary-comment:
+    name: "Post Results Summary"
+    needs:
+      - analyze-code
+      - generate-docs
+      - optimize-performance
+      - roadmap-planner
+      - parse-trigger
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./gpt5-results
+
+      - name: Compose Summary Comment
+        id: compose
+        run: |
+          echo "## 🤖 GPT-5 Multi-Model Analysis Summary" > summary.md
+          echo "" >> summary.md
+          for file in ./gpt5-results/*/*.md; do
+            echo "### $(basename $file .md | sed 's/gpt5-//g' | tr '-' ' ' | awk '{print toupper(substr($0,1,1)) substr($0,2)}')" >> summary.md
+            echo "" >> summary.md
+            cat "$file" >> summary.md
+            echo "" >> summary.md
+            echo "---" >> summary.md
+          done
+
+      - name: Post Comment to PR/Issue
+        if: ${{ needs.parse-trigger.outputs.context_number != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr comment ${{ needs.parse-trigger.outputs.context_number }} --body-file summary.md || \
+          gh issue comment ${{ needs.parse-trigger.outputs.context_number }} --body-file summary.md
+
+      - name: Upload Final Summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: gpt5-summary
+          path: summary.md

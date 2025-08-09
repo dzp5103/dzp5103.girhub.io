@@ -1,0 +1,265 @@
+name: GPT-5 Multi-Task AI & MCP Orchestration
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, labeled, reopened, unlocked]
+    branches: [main, develop]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      gpt_model:
+        description: "Model (gpt-5, gpt-5-chat, gpt-4-turbo)"
+        required: true
+        default: "gpt-5"
+        type: choice
+        options: [gpt-5, gpt-5-chat, gpt-4-turbo]
+      tasks:
+        description: "Tasks (comma-separated: review,doc,optimize,roadmap,all)"
+        required: true
+        default: "all"
+        type: string
+      target:
+        description: "Target file(s)/directory"
+        required: false
+        type: string
+
+env:
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY || secrets.COPILOT_API_KEY }}
+  GITHUB_API_PAT: ${{ secrets.GITHUB_API_PAT }}
+  GH_TOKEN: ${{ secrets.GITHUB_API_PAT }}
+  MCP_API_URL: "http://localhost:3001"
+
+jobs:
+  parse-trigger:
+    runs-on: ubuntu-latest
+    outputs:
+      gpt_model: ${{ steps.parse.outputs.gpt_model }}
+      tasks: ${{ steps.parse.outputs.tasks }}
+      target: ${{ steps.parse.outputs.target }}
+      context_type: ${{ steps.parse.outputs.context_type }}
+      context_number: ${{ steps.parse.outputs.context_number }}
+    steps:
+      - name: Parse Triggers and Commands
+        id: parse
+        run: |
+          # --- Parse workflow_dispatch, slash commands, or labels ---
+          MODEL="${{ github.event.inputs.gpt_model || 'gpt-5' }}"
+          TASKS="${{ github.event.inputs.tasks || 'all' }}"
+          TARGET="${{ github.event.inputs.target || '.' }}"
+          CTX_TYPE="none"
+          CTX_NUM=""
+          if [ "${{ github.event_name }}" = "issue_comment" ]; then
+            COMMENT="${{ github.event.comment.body }}"
+            if echo "$COMMENT" | grep -Ei '^/(gpt5|ai)\b'; then
+              ARGS=$(echo "$COMMENT" | sed -E 's/^\/(gpt5|ai)[[:space:]]*//i')
+              TASKS=$(echo "$ARGS" | awk '{print $1}')
+              [ -z "$TASKS" ] && TASKS="all"
+              TARGET=$(echo "$ARGS" | awk '{print $2}')
+              [ -z "$TARGET" ] && TARGET="."
+            fi
+            CTX_TYPE="comment"
+            CTX_NUM="${{ github.event.issue.number || github.event.pull_request.number }}"
+          elif [ "${{ github.event_name }}" = "pull_request" ]; then
+            LABELS="${{ toJson(github.event.pull_request.labels) }}"
+            if echo "$LABELS" | grep -q 'gpt5-analysis'; then TASKS="all"; fi
+            if echo "$LABELS" | grep -q 'ai-summary'; then TASKS="summarize"; fi
+            if echo "$LABELS" | grep -q 'mcp-health'; then TASKS="mcp-health"; fi
+            CTX_TYPE="pr"
+            CTX_NUM="${{ github.event.pull_request.number }}"
+          fi
+          echo "gpt_model=$MODEL" >> $GITHUB_OUTPUT
+          echo "tasks=$TASKS" >> $GITHUB_OUTPUT
+          echo "target=$TARGET" >> $GITHUB_OUTPUT
+          echo "context_type=$CTX_TYPE" >> $GITHUB_OUTPUT
+          echo "context_number=$CTX_NUM" >> $GITHUB_OUTPUT
+
+  mcp-health:
+    name: "MCP Health Check"
+    needs: parse-trigger
+    if: contains(needs.parse-trigger.outputs.tasks, 'mcp-health') || needs.parse-trigger.outputs.tasks == 'all'
+    runs-on: ubuntu-latest
+    outputs:
+      mcp_health: ${{ steps.mcp.outputs.health_result }}
+    steps:
+      - name: Query MCP Server Health
+        id: mcp
+        run: |
+          curl -s "$MCP_API_URL/health" > mcp-health.json
+          cat mcp-health.json
+          echo "health_result=$(cat mcp-health.json | base64 -w0)" >> $GITHUB_OUTPUT
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mcp-health
+          path: mcp-health.json
+
+  gpt5-review:
+    name: "GPT-5 Code Review"
+    needs: [parse-trigger, mcp-health]
+    if: contains(needs.parse-trigger.outputs.tasks, 'review') || needs.parse-trigger.outputs.tasks == 'all'
+    runs-on: ubuntu-latest
+    outputs:
+      review_result: ${{ steps.review.outputs.review_result }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decode MCP Health Context
+        run: echo "${{ needs.mcp-health.outputs.mcp_health }}" | base64 -d > mcp-health.json
+      - name: Run GPT-5 Code Review
+        id: review
+        run: |
+          npx gpt-model-call \
+            --model "${{ needs.parse-trigger.outputs.gpt_model }}" \
+            --task "review" \
+            --target "${{ needs.parse-trigger.outputs.target }}" \
+            --context "@mcp-health.json" \
+            --output "gpt5-review.md"
+          echo "review_result=$(cat gpt5-review.md | base64 -w0)" >> $GITHUB_OUTPUT
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gpt5-review
+          path: gpt5-review.md
+
+  gpt5-docgen:
+    name: "GPT-5 Documentation"
+    needs: [gpt5-review]
+    if: contains(needs.parse-trigger.outputs.tasks, 'doc') || needs.parse-trigger.outputs.tasks == 'all'
+    runs-on: ubuntu-latest
+    outputs:
+      doc_result: ${{ steps.doc.outputs.doc_result }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decode Review Context
+        run: echo "${{ needs.gpt5-review.outputs.review_result }}" | base64 -d > gpt5-review.md
+      - name: Run GPT-5 Documentation
+        id: doc
+        run: |
+          npx gpt-model-call \
+            --model "${{ needs.parse-trigger.outputs.gpt_model }}" \
+            --task "document" \
+            --target "${{ needs.parse-trigger.outputs.target }}" \
+            --context "@gpt5-review.md" \
+            --output "gpt5-docs.md"
+          echo "doc_result=$(cat gpt5-docs.md | base64 -w0)" >> $GITHUB_OUTPUT
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gpt5-docs
+          path: gpt5-docs.md
+
+  gpt5-optimize:
+    name: "GPT-5 Optimization"
+    needs: [gpt5-docgen]
+    if: contains(needs.parse-trigger.outputs.tasks, 'optimize') || needs.parse-trigger.outputs.tasks == 'all'
+    runs-on: ubuntu-latest
+    outputs:
+      optimize_result: ${{ steps.optimize.outputs.optimize_result }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decode Doc Context
+        run: echo "${{ needs.gpt5-docgen.outputs.doc_result }}" | base64 -d > gpt5-docs.md
+      - name: Run GPT-5 Optimization
+        id: optimize
+        run: |
+          npx gpt-model-call \
+            --model "${{ needs.parse-trigger.outputs.gpt_model }}" \
+            --task "optimize" \
+            --target "${{ needs.parse-trigger.outputs.target }}" \
+            --context "@gpt5-docs.md" \
+            --output "gpt5-optimize.md"
+          echo "optimize_result=$(cat gpt5-optimize.md | base64 -w0)" >> $GITHUB_OUTPUT
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gpt5-optimize
+          path: gpt5-optimize.md
+
+  gpt5-roadmap:
+    name: "GPT-5 Roadmap"
+    needs: [gpt5-optimize, mcp-health]
+    if: contains(needs.parse-trigger.outputs.tasks, 'roadmap') || needs.parse-trigger.outputs.tasks == 'all'
+    runs-on: ubuntu-latest
+    outputs:
+      roadmap_result: ${{ steps.roadmap.outputs.roadmap_result }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decode Optimize and MCP Health Context
+        run: |
+          echo "${{ needs.gpt5-optimize.outputs.optimize_result }}" | base64 -d > gpt5-optimize.md
+          echo "${{ needs.mcp-health.outputs.mcp_health }}" | base64 -d > mcp-health.json
+      - name: Run GPT-5 Roadmap
+        id: roadmap
+        run: |
+          npx gpt-model-call \
+            --model "${{ needs.parse-trigger.outputs.gpt_model }}" \
+            --task "roadmap" \
+            --target "${{ needs.parse-trigger.outputs.target }}" \
+            --context "@gpt5-optimize.md,@mcp-health.json" \
+            --output "gpt5-roadmap.md"
+          echo "roadmap_result=$(cat gpt5-roadmap.md | base64 -w0)" >> $GITHUB_OUTPUT
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gpt5-roadmap
+          path: gpt5-roadmap.md
+
+  ai-summary:
+    name: "AI Summarization"
+    needs: parse-trigger
+    if: contains(needs.parse-trigger.outputs.tasks, 'summarize')
+    runs-on: ubuntu-latest
+    outputs:
+      summary_result: ${{ steps.summarize.outputs.summary_result }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run GPT-5 Summarization
+        id: summarize
+        run: |
+          npx gpt-model-call \
+            --model "${{ needs.parse-trigger.outputs.gpt_model }}" \
+            --task "summarize" \
+            --target "${{ needs.parse-trigger.outputs.target }}" \
+            --output "ai-summary.md"
+          echo "summary_result=$(cat ai-summary.md | base64 -w0)" >> $GITHUB_OUTPUT
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ai-summary
+          path: ai-summary.md
+
+  post-summary:
+    name: "Post Summary to PR or Issue"
+    needs:
+      - gpt5-review
+      - gpt5-docgen
+      - gpt5-optimize
+      - gpt5-roadmap
+      - ai-summary
+      - mcp-health
+      - parse-trigger
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decode All Contexts
+        run: |
+          [ -n "${{ needs.gpt5-review.outputs.review_result }}" ] && echo "${{ needs.gpt5-review.outputs.review_result }}" | base64 -d > gpt5-review.md || true
+          [ -n "${{ needs.gpt5-docgen.outputs.doc_result }}" ] && echo "${{ needs.gpt5-docgen.outputs.doc_result }}" | base64 -d > gpt5-docs.md || true
+          [ -n "${{ needs.gpt5-optimize.outputs.optimize_result }}" ] && echo "${{ needs.gpt5-optimize.outputs.optimize_result }}" | base64 -d > gpt5-optimize.md || true
+          [ -n "${{ needs.gpt5-roadmap.outputs.roadmap_result }}" ] && echo "${{ needs.gpt5-roadmap.outputs.roadmap_result }}" | base64 -d > gpt5-roadmap.md || true
+          [ -n "${{ needs.ai-summary.outputs.summary_result }}" ] && echo "${{ needs.ai-summary.outputs.summary_result }}" | base64 -d > ai-summary.md || true
+          [ -n "${{ needs.mcp-health.outputs.mcp_health }}" ] && echo "${{ needs.mcp-health.outputs.mcp_health }}" | base64 -d > mcp-health.json || true
+      - name: Compose Final AI Summary
+        run: |
+          echo "## 🤖 AI Multi-Task Analysis Summary" > summary.md
+          [ -f mcp-health.json ] && { echo "### MCP Health:" >> summary.md; cat mcp-health.json >> summary.md; echo "---" >> summary.md; }
+          [ -f gpt5-review.md ] && { echo "### GPT-5 Code Review:" >> summary.md; cat gpt5-review.md >> summary.md; echo "---" >> summary.md; }
+          [ -f gpt5-docs.md ] && { echo "### GPT-5 Documentation:" >> summary.md; cat gpt5-docs.md >> summary.md; echo "---" >> summary.md; }
+          [ -f gpt5-optimize.md ] && { echo "### GPT-5 Optimization:" >> summary.md; cat gpt5-optimize.md >> summary.md; echo "---" >> summary.md; }
+          [ -f gpt5-roadmap.md ] && { echo "### GPT-5 Roadmap:" >> summary.md; cat gpt5-roadmap.md >> summary.md; echo "---" >> summary.md; }
+          [ -f ai-summary.md ] && { echo "### AI Summary:" >> summary.md; cat ai-summary.md >> summary.md; echo "---" >> summary.md; }
+      - name: Post PR/Issue Comment
+        if: ${{ needs.parse-trigger.outputs.context_number != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_API_PAT }}
+        run: |
+          gh pr comment ${{ needs.parse-trigger.outputs.context_number }} --body-file summary.md || \
+          gh issue comment ${{ needs.parse-trigger.outputs.context_number }} --body-file summary.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ai-multitask-summary
+          path: summary.md
