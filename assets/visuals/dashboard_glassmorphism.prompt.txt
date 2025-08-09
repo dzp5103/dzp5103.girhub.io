@@ -1,1 +1,0 @@
-Minimal KPI dashboard summarizing quantitative indicators from 'JRC142598_01'. Glassmorphism cards, muted colors, spark-lines, annotations with page refs; 3200px.

@@ -1,1 +1,0 @@
-Left-to-right flow diagram: Problem → Data Sources → Preprocessing/Assumptions → Methods/Models → Validation → Findings → Recommendations. Flat UI style; blue-gray with green accent; 3200px.
