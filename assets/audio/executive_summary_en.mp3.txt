@@ -1,0 +1,9 @@
+[TTS]
+lang=en
+gender=female
+voice=default
+pace=normal
+emphasis=medium
+sample_rate=24000
+
+This document presents a comprehensive analysis of the JRC142598_01 report. The following sections provide structured insights derived from the source material.

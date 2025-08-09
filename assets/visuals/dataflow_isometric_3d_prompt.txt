@@ -1,0 +1,14 @@
+Image Generation Prompt: dataflow_isometric_3d
+
+Prompt:
+3D isometric data-flow diagram with depth cues: stacked data sources feeding ETL/preprocessing blocks, models, validation, findings, recommendations. Use soft shadows, isometric projection, subtle gradients, professional tech palette (slate, cyan, lime accents). Annotate each node with 1–2 bullets. Export 3200px PNG/SVG.
+
+Instructions:
+- This is a placeholder file created when OPENAI_API_KEY is not available
+- To generate the actual image, configure the OpenAI API key and run the workflow
+- The image would be saved as dataflow_isometric_3d.png or dataflow_isometric_3d.jpg
+
+Generation Settings:
+- Size: 3200px (high resolution)
+- Format: PNG/JPEG
+- Style: As specified in prompt

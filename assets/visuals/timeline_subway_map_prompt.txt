@@ -1,0 +1,14 @@
+Image Generation Prompt: timeline_subway_map
+
+Prompt:
+Subway-map timeline visualization: multiple colored lines representing parallel workstreams (Intake, Analysis, Visuals, Publish). Circular stations with labels and connection interchanges. Clean metro-style design, white background, high-contrast colored lines, station legends. Export 3200px PNG/SVG.
+
+Instructions:
+- This is a placeholder file created when OPENAI_API_KEY is not available
+- To generate the actual image, configure the OpenAI API key and run the workflow
+- The image would be saved as timeline_subway_map.png or timeline_subway_map.jpg
+
+Generation Settings:
+- Size: 3200px (high resolution)
+- Format: PNG/JPEG
+- Style: As specified in prompt

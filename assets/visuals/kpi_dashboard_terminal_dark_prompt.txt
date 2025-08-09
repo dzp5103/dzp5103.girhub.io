@@ -1,0 +1,14 @@
+Image Generation Prompt: kpi_dashboard_terminal_dark
+
+Prompt:
+Dark-mode terminal-themed KPI dashboard for 'JRC142598_01': black background (#0b0f10), green matrix-style text (#00ff88), ASCII-like boxes, monospace font (IBM Plex Mono). Show 4–6 metric cards with labels, values, unit, trend arrow made of ASCII, and spark-lines. Export 3200px PNG/SVG.
+
+Instructions:
+- This is a placeholder file created when OPENAI_API_KEY is not available
+- To generate the actual image, configure the OpenAI API key and run the workflow
+- The image would be saved as kpi_dashboard_terminal_dark.png or kpi_dashboard_terminal_dark.jpg
+
+Generation Settings:
+- Size: 3200px (high resolution)
+- Format: PNG/JPEG
+- Style: As specified in prompt

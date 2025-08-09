@@ -1,0 +1,13 @@
+flowchart LR
+  classDef lineA stroke:#1f77b4,stroke-width:4px,fill:none,color:#1f77b4
+  classDef lineB stroke:#2ca02c,stroke-width:4px,fill:none,color:#2ca02c
+  classDef station fill:#fff,stroke:#222,stroke-width:1px,color:#222
+
+  A0((Intake)):::station --> A1((Parse)):::station --> A2((Visuals)):::station --> A3((Review)):::station
+  B0((Data)):::station --> B1((OCR)):::station --> B2((Synthesis)):::station --> B3((Publish)):::station
+
+  A0 --- A1 --- A2 --- A3
+  B0 --- B1 --- B2 --- B3
+
+  class A0,A1,A2,A3 lineA
+  class B0,B1,B2,B3 lineB

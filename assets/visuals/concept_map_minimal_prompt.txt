@@ -1,0 +1,14 @@
+Image Generation Prompt: concept_map_minimal
+
+Prompt:
+Create a high-resolution concept map illustrating the main themes of the report 'JRC142598_01'. Central node: 'JRC142598_01'. Branches: Methods, Findings, Implications, Limitations. Style: minimal vector; palette: teals & blues; typography: Inter; white background; export at 3200px. Include small legend and page refs when available.
+
+Instructions:
+- This is a placeholder file created when OPENAI_API_KEY is not available
+- To generate the actual image, configure the OpenAI API key and run the workflow
+- The image would be saved as concept_map_minimal.png or concept_map_minimal.jpg
+
+Generation Settings:
+- Size: 3200px (high resolution)
+- Format: PNG/JPEG
+- Style: As specified in prompt
