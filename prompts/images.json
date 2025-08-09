@@ -1,0 +1,26 @@
+[
+  {
+    "id": "concept_map_minimal",
+    "prompt": "Create a high-resolution concept map illustrating the main themes of the report 'JRC142598_01'. Central node: 'JRC142598_01'. Branches: Methods, Findings, Implications, Limitations. Style: minimal vector; palette: teals & blues; typography: Inter; white background; export at 3200px. Include small legend and page refs when available."
+  },
+  {
+    "id": "concept_map_neomorphic",
+    "prompt": "Concept map of 'JRC142598_01' with soft neomorphic cards, subtle shadows, rounded corners; pastel palette; light gray background; 3200px; accessible contrast."
+  },
+  {
+    "id": "method_flow_flat",
+    "prompt": "Left-to-right flow diagram: Problem → Data Sources → Preprocessing/Assumptions → Methods/Models → Validation → Findings → Recommendations. Flat UI style; blue-gray with green accent; 3200px."
+  },
+  {
+    "id": "timeline_editorial",
+    "prompt": "Dual-lane timeline: top=historical milestones; bottom=future roadmap phases (Phase 1–4) for implementing insights from 'JRC142598_01'. Editorial design with clear date markers; navy/cyan/gray palette; 3200px."
+  },
+  {
+    "id": "matrix_isometric",
+    "prompt": "Comparative matrix contrasting three options (A,B,C) across Effectiveness, Cost, Risk, Data Requirements, Time-to-Impact. Isometric cells with icons, checkmarks, arrows; 3200px."
+  },
+  {
+    "id": "dashboard_glassmorphism",
+    "prompt": "Minimal KPI dashboard summarizing quantitative indicators from 'JRC142598_01'. Glassmorphism cards, muted colors, spark-lines, annotations with page refs; 3200px."
+  }
+]
