@@ -1,0 +1,9 @@
+[TTS]
+lang=es
+gender=male
+voice=default
+pace=slow
+emphasis=high
+sample_rate=24000
+
+This document presents a comprehensive analysis of the JRC142598_01 report. The following sections provide structured insights derived from the source material.

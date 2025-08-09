@@ -1,0 +1,42 @@
+[
+  {
+    "id": "concept_map_minimal",
+    "prompt": "Create a high-resolution concept map illustrating the main themes of the report 'JRC142598_01'. Central node: 'JRC142598_01'. Branches: Methods, Findings, Implications, Limitations. Style: minimal vector; palette: teals & blues; typography: Inter; white background; export at 3200px. Include small legend and page refs when available."
+  },
+  {
+    "id": "concept_map_neomorphic",
+    "prompt": "Concept map of 'JRC142598_01' with soft neomorphic cards, subtle shadows, rounded corners; pastel palette; light gray background; 3200px; accessible contrast."
+  },
+  {
+    "id": "method_flow_flat",
+    "prompt": "Left-to-right flow diagram: Problem → Data Sources → Preprocessing/Assumptions → Methods/Models → Validation → Findings → Recommendations. Flat UI style; blue-gray with green accent; 3200px."
+  },
+  {
+    "id": "timeline_editorial",
+    "prompt": "Dual-lane timeline: top=historical milestones; bottom=future roadmap phases (Phase 1–4) for implementing insights from 'JRC142598_01'. Editorial design with clear date markers; navy/cyan/gray palette; 3200px."
+  },
+  {
+    "id": "matrix_isometric",
+    "prompt": "Comparative matrix contrasting three options (A,B,C) across Effectiveness, Cost, Risk, Data Requirements, Time-to-Impact. Isometric cells with icons, checkmarks, arrows; 3200px."
+  },
+  {
+    "id": "dashboard_glassmorphism",
+    "prompt": "Minimal KPI dashboard summarizing quantitative indicators from 'JRC142598_01'. Glassmorphism cards, muted colors, spark-lines, annotations with page refs; 3200px."
+  },
+  {
+    "id": "concept_map_editorial_lineart",
+    "prompt": "Editorial line-art concept map of 'JRC142598_01' using clean black strokes, thin connectors, and hand-drawn style annotations. White background with subtle grid, monochrome primary with a single accent color for highlights. Include small callouts with section/page references. Export PNG/SVG at 3200px."
+  },
+  {
+    "id": "kpi_dashboard_terminal_dark",
+    "prompt": "Dark-mode terminal-themed KPI dashboard for 'JRC142598_01': black background (#0b0f10), green matrix-style text (#00ff88), ASCII-like boxes, monospace font (IBM Plex Mono). Show 4–6 metric cards with labels, values, unit, trend arrow made of ASCII, and spark-lines. Export 3200px PNG/SVG."
+  },
+  {
+    "id": "timeline_subway_map",
+    "prompt": "Subway-map timeline visualization: multiple colored lines representing parallel workstreams (Intake, Analysis, Visuals, Publish). Circular stations with labels and connection interchanges. Clean metro-style design, white background, high-contrast colored lines, station legends. Export 3200px PNG/SVG."
+  },
+  {
+    "id": "dataflow_isometric_3d",
+    "prompt": "3D isometric data-flow diagram with depth cues: stacked data sources feeding ETL/preprocessing blocks, models, validation, findings, recommendations. Use soft shadows, isometric projection, subtle gradients, professional tech palette (slate, cyan, lime accents). Annotate each node with 1–2 bullets. Export 3200px PNG/SVG."
+  }
+]

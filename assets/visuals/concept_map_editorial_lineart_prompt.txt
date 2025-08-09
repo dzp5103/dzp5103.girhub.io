@@ -1,0 +1,14 @@
+Image Generation Prompt: concept_map_editorial_lineart
+
+Prompt:
+Editorial line-art concept map of 'JRC142598_01' using clean black strokes, thin connectors, and hand-drawn style annotations. White background with subtle grid, monochrome primary with a single accent color for highlights. Include small callouts with section/page references. Export PNG/SVG at 3200px.
+
+Instructions:
+- This is a placeholder file created when OPENAI_API_KEY is not available
+- To generate the actual image, configure the OpenAI API key and run the workflow
+- The image would be saved as concept_map_editorial_lineart.png or concept_map_editorial_lineart.jpg
+
+Generation Settings:
+- Size: 3200px (high resolution)
+- Format: PNG/JPEG
+- Style: As specified in prompt

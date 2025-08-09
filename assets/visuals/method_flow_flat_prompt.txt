@@ -1,0 +1,14 @@
+Image Generation Prompt: method_flow_flat
+
+Prompt:
+Left-to-right flow diagram: Problem → Data Sources → Preprocessing/Assumptions → Methods/Models → Validation → Findings → Recommendations. Flat UI style; blue-gray with green accent; 3200px.
+
+Instructions:
+- This is a placeholder file created when OPENAI_API_KEY is not available
+- To generate the actual image, configure the OpenAI API key and run the workflow
+- The image would be saved as method_flow_flat.png or method_flow_flat.jpg
+
+Generation Settings:
+- Size: 3200px (high resolution)
+- Format: PNG/JPEG
+- Style: As specified in prompt

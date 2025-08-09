@@ -1,0 +1,126 @@
+name: PDF Analysis, Visuals, and Audio
+
+on:
+  workflow_dispatch:
+    inputs:
+      force_ocr:
+        description: "Force OCR even if text extraction succeeds"
+        required: false
+        default: "false"
+  push:
+    paths:
+      - 'JRC142598_01.pdf'
+      - 'scripts/**'
+      - 'deliverables/**'
+      - '.github/workflows/pdf-analysis.yml'
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Setup Node (for Marp and Mermaid)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install system dependencies (OCR, PDF tools)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils tesseract-ocr tesseract-ocr-eng
+
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pypdf pdfminer.six pytesseract pillow pdf2image requests markdownify beautifulsoup4
+
+      - name: Install Node tools (Marp CLI, Mermaid CLI)
+        run: |
+          npm i -g @marp-team/marp-cli @mermaid-js/mermaid-cli
+
+      - name: Extract text from PDF (with OCR fallback)
+        env:
+          FORCE_OCR: ${{ github.event.inputs.force_ocr }}
+        run: |
+          mkdir -p data deliverables assets/visuals assets/audio scripts prompts
+          python scripts/pdf_pipeline.py --local-path JRC142598_01.pdf || true
+
+      - name: LLM Summarization and Synthesis (optional, uses OpenAI)
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          MODEL_ID: ${{ vars.MODEL_ID }}
+        run: |
+          if [ -n "${OPENAI_API_KEY}" ]; then
+            python scripts/llm_summarize.py --raw-text data/raw_text.txt --out-rundown deliverables/full_rundown.md --out-key deliverables/key_findings.md --out-risks deliverables/risks_limitations.md || true
+          else
+            echo "OPENAI_API_KEY not set; skipping LLM summarization."
+          fi
+
+      - name: Generate visuals with Mermaid (multi-style)
+        run: |
+          node --version
+          python scripts/generate_mermaid_sources.py
+          for f in assets/visuals/*.mmd; do
+            base=$(basename "$f" .mmd)
+            mmdc -i "$f" -o "assets/visuals/${base}.svg" --scale 1 || true
+            mmdc -i "$f" -o "assets/visuals/${base}.png" --scale 2 || true
+          done
+
+      - name: Generate images via OpenAI (optional)
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          MODEL_ID: ${{ vars.MODEL_ID }}
+        run: |
+          if [ -n "${OPENAI_API_KEY}" ]; then
+            python scripts/generate_images_openai.py --prompts prompts/images.json --out-dir assets/visuals || true
+          else
+            echo "OPENAI_API_KEY not set; skipping image generation."
+          fi
+
+      - name: Generate audio narration (multilingual, optional)
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          MODEL_ID: ${{ vars.MODEL_ID }}
+          TTS_LANGS: ${{ vars.TTS_LANGS }}
+          TTS_GENDER: ${{ vars.TTS_GENDER }}
+          TTS_PACE: ${{ vars.TTS_PACE }}
+          TTS_EMPHASIS: ${{ vars.TTS_EMPHASIS }}
+        run: |
+          if [ -n "${OPENAI_API_KEY}" ]; then
+            langs="${TTS_LANGS}"
+            if [ -z "$langs" ]; then langs="en"; fi
+            for lang in $(echo "$langs" | tr ',' ' '); do
+              python scripts/tts_openai.py \
+                --text-file deliverables/full_rundown.md \
+                --section "Executive Summary" \
+                --language "$lang" \
+                --gender "${TTS_GENDER:-female}" \
+                --pace "${TTS_PACE:-normal}" \
+                --emphasis "${TTS_EMPHASIS:-medium}" \
+                --out-file "assets/audio/executive_summary_${lang}.mp3" || true
+            done
+          else
+            echo "OPENAI_API_KEY not set; skipping audio generation."
+          fi
+
+      - name: Build Marp presentation
+        run: |
+          marp deliverables/presentation.marp.md --pdf --allow-local-files --output assets/visuals/presentation.pdf || true
+          marp deliverables/presentation.marp.md --html --allow-local-files --output assets/visuals/presentation.html || true
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdf-analysis-outputs
+          path: |
+            data/
+            deliverables/
+            assets/visuals/
+            assets/audio/

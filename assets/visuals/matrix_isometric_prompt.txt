@@ -1,0 +1,14 @@
+Image Generation Prompt: matrix_isometric
+
+Prompt:
+Comparative matrix contrasting three options (A,B,C) across Effectiveness, Cost, Risk, Data Requirements, Time-to-Impact. Isometric cells with icons, checkmarks, arrows; 3200px.
+
+Instructions:
+- This is a placeholder file created when OPENAI_API_KEY is not available
+- To generate the actual image, configure the OpenAI API key and run the workflow
+- The image would be saved as matrix_isometric.png or matrix_isometric.jpg
+
+Generation Settings:
+- Size: 3200px (high resolution)
+- Format: PNG/JPEG
+- Style: As specified in prompt
